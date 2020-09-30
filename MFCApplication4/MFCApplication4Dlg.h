@@ -47,7 +47,6 @@ public:
 	CString m_outStr;
 	afx_msg void OnEnChangeInputFile1();
 	afx_msg void OnEnChangeInputFile2();
-	afx_msg void OnEnChangeEdit3();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	// 总进度条
@@ -56,6 +55,13 @@ public:
 	CProgressCtrl m_progressOne;
 	afx_msg void OnEnChangeEdit1();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	CComboBox m_comInput;
-	CComboBox m_comInput2;
+	afx_msg void OnEnChangeEdit3();
+	afx_msg void OnCbnSelchangeCombo1();
+	CComboBox m_comType;
+	CComboBox m_errorType;
+	afx_msg void OnCbnSelchangeCombo2();
+	afx_msg void OnBnClickedCheck1();
+	CButton m_sameNameCmp;
+	afx_msg void OnBnClickedCheck2();
+	CButton m_sameNameCompare;
 };

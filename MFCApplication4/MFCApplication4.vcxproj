@@ -213,6 +213,9 @@
     <None Include="res\MFCApplication4.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\..\Desktop\新建文件夹\favicon (2).ico" />
+    <Image Include="..\..\..\..\..\Desktop\新建文件夹\favicon (6).ico" />
+    <Image Include="..\..\..\..\..\Desktop\新建文件夹\favicon.ico" />
     <Image Include="..\..\..\..\Desktop\新建文件夹\favicon (2).ico" />
     <Image Include="..\..\..\..\Desktop\新建文件夹\favicon (6).ico" />
     <Image Include="..\..\..\..\Desktop\新建文件夹\favicon.ico" />

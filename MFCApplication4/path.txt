@@ -1,6 +1,7 @@
-2 3
-111
-222
-333
-444
-555
+3 3
+2
+1
+C:\Users\YS\Desktop\tremp\fast.txt
+
+
+C:\Users\YS\Desktop\tremp\fast - ¸±±¾.txt

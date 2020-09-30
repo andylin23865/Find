@@ -10,6 +10,7 @@
 #include <windows.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string>
 
 bool is_dir(const char* path) {
 	struct _stat buf = { 0 };
@@ -17,8 +18,15 @@ bool is_dir(const char* path) {
 	return buf.st_mode & _S_IFDIR;
 }
 
+std::string getFileName(std::string filePath) {
+	int pos = filePath.find_last_of('\\');
+	return filePath.substr(pos + 1, filePath.size() - pos - 1);
+}
 
 using namespace std;
+bool lineCmp = false;
+bool errorTypenow = true;
+bool sameName = true;
 
 extern int g_proAll;
 extern int g_proOne;
@@ -114,6 +122,14 @@ bool isSame(string file1, string file2) {
 	return true;
 }
 
+int findFile(string fileName, vector<string>& files) {
+	for (int i = 0; i < files.size(); i++) {
+		if (fileName == getFileName(files[i]))
+			return i;
+	}
+	return -1;
+}
+
 void getFiles(string path, vector<string>& files)
 {
 	if (!is_dir(path.c_str())) {//如果是文件路径
@@ -191,6 +207,48 @@ bool isSameFile(string file1, string file2, CString& reMsg) {
 	return true;
 }
 
+bool isSameFileLine(string file1, string file2, CString& reMsg, CMFCApplication4Dlg* hwnd) {
+	g_proOne = 0;
+	std::ifstream OsRead1(file1, std::ofstream::app);
+	std::ifstream OsRead2(file2, std::ofstream::app);
+	string str1;
+	string str2;
+	int lineNum = 1;
+	bool ret = true;
+	while (getline(OsRead1, str1)) {
+		if (!getline(OsRead2, str2)) {
+			reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
+			reMsg += file1.c_str();
+			reMsg += "\r\n*";
+			reMsg += file2.c_str();
+			reMsg += "\r\n";
+			reMsg += "NOT SAME SIZE!\r\n";
+			hwnd->UpdateData(FALSE);
+			return false;
+		}
+		if (str1 != str2) {
+			char temp[20];
+			_itoa(lineNum, temp,10);
+			reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
+			reMsg += file1.c_str();
+			reMsg += "---->:";
+			reMsg += str1.c_str();
+			reMsg += "\r\n*";
+			reMsg += file2.c_str();
+			reMsg += "---->:";
+			reMsg += str2.c_str();
+			reMsg += "\r\n";
+			reMsg += CString("NOT SAME Line at "+ CString(temp) +"!\r\n");
+			hwnd->UpdateData(FALSE);
+			ret = false;
+			if(errorTypenow)
+				return ret;
+		}
+		lineNum++;
+	}
+	return ret;
+}
+
 void isSamePath(string filePath1, string filePath2,CString& reMsg,CMFCApplication4Dlg* hwnd) {
 	g_proAll = 0;
 	vector<string> files1;
@@ -198,40 +256,97 @@ void isSamePath(string filePath1, string filePath2,CString& reMsg,CMFCApplicatio
 
 	getFiles(filePath1, files1);
 	getFiles(filePath2, files2);
-
-	for (int i = 0; i < files1.size(); i++) {
-		g_proAll = (double)i / files1.size() * 100;
-		if (false == isSameFile(files1[i], files2[i], reMsg)) {
-			//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED);
-			//reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
-			//reMsg += files1[i].c_str();
-			//reMsg += "\r\n*";
-			//reMsg +=	files2[i].c_str();
-			//reMsg += "\r\n";
-			reMsg += "*--------------------------------NOTSAME----------------------------------\r\n";
-			//hwnd->UpdateData(FALSE);
-			//int line = hwnd->m_output.GetLineCount();
-			//hwnd->m_output.LineScroll(line - 1);
-			//update = false;
-			hwnd->SetDlgItemTextA(IDC_EDIT3, reMsg);
-			int line = hwnd->m_output.GetLineCount();
-			hwnd->m_output.LineScroll(line - 1);
-		}
-		else {
-			//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN);
-			//reMsg += "--------------------------------SAME----------------------------------\r\n";
-			//reMsg += files1[i].c_str();
-			//reMsg += "\r\n";
-			//reMsg += files2[i].c_str();
-			//reMsg += "\r\n";
-			reMsg += "--------------------------------SAME----------------------------------\r\n";
-			//hwnd->UpdateData(FALSE);
-			//int line = hwnd->m_output.GetLineCount();
-			//hwnd->m_output.LineScroll(line - 1);
-			//update = true;
-			hwnd->SetDlgItemTextA(IDC_EDIT3, reMsg);
-			int line = hwnd->m_output.GetLineCount();
-			hwnd->m_output.LineScroll(line - 1);
+	{
+		for (int i = 0; i < files1.size(); i++) {
+			g_proAll = (double)i / files1.size() * 100;
+			string file1 = files1[i];
+			string file2;
+			if (sameName && !(files1.size() == 1 && files2.size() == 1))
+			{
+				int index = findFile(getFileName(file1), files2);
+				if (index == -1) {
+					reMsg += "*--------------------------------NOTFINDFILE----------------------------------\r\n";
+					reMsg += files1[i].c_str();
+					reMsg += "\r\n*";
+					reMsg += "*--------------------------------NOTFINDFILE----------------------------------\r\n";
+					continue;
+				}
+				else {
+					file2 = files2[index];
+				}
+			}
+			else {
+				file2 = files2[i];
+			}
+			if (lineCmp)
+			{
+				if (false == isSameFileLine(file1, file2, reMsg, hwnd)) {
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED);
+					//reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
+					//reMsg += files1[i].c_str();
+					//reMsg += "\r\n*";
+					//reMsg +=	files2[i].c_str();
+					//reMsg += "\r\n";
+					reMsg += "*--------------------------------NOTSAME----------------------------------\r\n";
+					//hwnd->UpdateData(FALSE);
+					//int line = hwnd->m_output.GetLineCount();
+					//hwnd->m_output.LineScroll(line - 1);
+					//update = false;
+					hwnd->SetDlgItemTextA(IDC_EDIT3, reMsg);
+					int line = hwnd->m_output.GetLineCount();
+					hwnd->m_output.LineScroll(line - 1);
+				}
+				else {
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN);
+					//reMsg += "--------------------------------SAME----------------------------------\r\n";
+					//reMsg += files1[i].c_str();
+					//reMsg += "\r\n";
+					//reMsg += files2[i].c_str();
+					//reMsg += "\r\n";
+					reMsg += "--------------------------------SAME----------------------------------\r\n";
+					//hwnd->UpdateData(FALSE);
+					//int line = hwnd->m_output.GetLineCount();
+					//hwnd->m_output.LineScroll(line - 1);
+					//update = true;
+					hwnd->SetDlgItemTextA(IDC_EDIT3, reMsg);
+					int line = hwnd->m_output.GetLineCount();
+					hwnd->m_output.LineScroll(line - 1);
+				}
+			}
+			else {
+				if (false == isSameFile(file1, file2, reMsg)) {
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED);
+					//reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
+					//reMsg += files1[i].c_str();
+					//reMsg += "\r\n*";
+					//reMsg +=	files2[i].c_str();
+					//reMsg += "\r\n";
+					reMsg += "*--------------------------------NOTSAME----------------------------------\r\n";
+					//hwnd->UpdateData(FALSE);
+					//int line = hwnd->m_output.GetLineCount();
+					//hwnd->m_output.LineScroll(line - 1);
+					//update = false;
+					hwnd->SetDlgItemTextA(IDC_EDIT3, reMsg);
+					int line = hwnd->m_output.GetLineCount();
+					hwnd->m_output.LineScroll(line - 1);
+				}
+				else {
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN);
+					//reMsg += "--------------------------------SAME----------------------------------\r\n";
+					//reMsg += files1[i].c_str();
+					//reMsg += "\r\n";
+					//reMsg += files2[i].c_str();
+					//reMsg += "\r\n";
+					reMsg += "--------------------------------SAME----------------------------------\r\n";
+					//hwnd->UpdateData(FALSE);
+					//int line = hwnd->m_output.GetLineCount();
+					//hwnd->m_output.LineScroll(line - 1);
+					//update = true;
+					hwnd->SetDlgItemTextA(IDC_EDIT3, reMsg);
+					int line = hwnd->m_output.GetLineCount();
+					hwnd->m_output.LineScroll(line - 1);
+				}
+			}
 		}
 	}
 	g_proAll = 100;

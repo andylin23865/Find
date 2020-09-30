@@ -24,11 +24,14 @@
 int g_proAll = 0;
 int g_proOne = 0;
 bool update = true;
+extern bool lineCmp;
+extern bool errorTypenow;
+extern bool sameName;
 
 #define MAX_CNT 3
 
-queue<string> inputList1;
-queue<string> inputList2;
+vector<string> inputList1;
+vector<string> inputList2;
 string savePath = "path.txt";
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
@@ -151,8 +154,10 @@ void CMFCApplication4Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT3, m_outStr);
 	DDX_Control(pDX, IDC_PROGRESS1, m_progressAll);
 	DDX_Control(pDX, IDC_PROGRESS2, m_progressOne);
-	DDX_Control(pDX, IDC_COMBO3, m_comInput);
-	DDX_Control(pDX, IDC_COMBO5, m_comInput2);
+	DDX_Control(pDX, IDC_COMBO1, m_comType);
+	DDX_Control(pDX, IDC_COMBO2, m_errorType);
+	DDX_Control(pDX, IDC_CHECK1, m_sameNameCmp);
+	DDX_Control(pDX, IDC_CHECK2, m_sameNameCompare);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication4Dlg, CDialogEx)
@@ -169,6 +174,11 @@ BEGIN_MESSAGE_MAP(CMFCApplication4Dlg, CDialogEx)
 	ON_WM_DROPFILES()
 	//ON_EN_CHANGE(IDC_EDIT1, &CMFCApplication4Dlg::OnEnChangeEdit1)
 	ON_WM_TIMER()
+	ON_EN_CHANGE(IDC_EDIT3, &CMFCApplication4Dlg::OnEnChangeEdit3)
+	ON_CBN_SELCHANGE(IDC_COMBO1, &CMFCApplication4Dlg::OnCbnSelchangeCombo1)
+	ON_CBN_SELCHANGE(IDC_COMBO2, &CMFCApplication4Dlg::OnCbnSelchangeCombo2)
+	ON_BN_CLICKED(IDC_CHECK1, &CMFCApplication4Dlg::OnBnClickedCheck1)
+	ON_BN_CLICKED(IDC_CHECK2, &CMFCApplication4Dlg::OnBnClickedCheck2)
 END_MESSAGE_MAP()
 
 
@@ -226,8 +236,6 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
 	ChangeWindowMessageFilter(0x0049, MSGFLT_ADD);
-	m_comInput.ShowWindow(FALSE);
-	m_comInput2.ShowWindow(FALSE);
 
 	char buffer[MAX_PATH];
 	_getcwd(buffer, MAX_PATH);
@@ -238,14 +246,25 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 	OsRead >> size1 >> size2;
 	for (int i = 0; i < size1; i++) {
 		OsRead >> buffer;
-		inputList1.push(buffer);
+		inputList1.push_back(buffer);
 	}
 	for (int i = 0; i < size2; i++) {
 		OsRead >> buffer;
-		inputList2.push(buffer);
+		inputList2.push_back(buffer);
 	}
 	//inputList2.push("555");
 	OsRead.close();
+	m_comType.AddString("bin");
+	m_comType.AddString("line");
+	m_comType.SetCurSel(0);
+
+	m_errorType.AddString("all");
+	m_errorType.AddString("now");
+	m_errorType.SetCurSel(1);
+
+	m_inputFile1 = inputList1[inputList1.size() - 1].c_str();
+	m_inputFile2 = inputList2[inputList2.size() - 1].c_str();
+	UpdateData(FALSE);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -264,12 +283,10 @@ void CMFCApplication4Dlg::save()
 	int size1 = inputList1.size();
 	int size2 = inputList2.size();
 	for (int i = 0; i < size1; i++) {
-		OsWrite << inputList1.front().c_str() << endl;
-		inputList1.pop();
+		OsWrite << inputList1[i].c_str() << endl;
 	}
 	for (int i = 0; i < size2; i++) {
-		OsWrite << inputList2.front().c_str() << endl;
-		inputList2.pop();
+		OsWrite << inputList2[i].c_str() << endl;
 	}
 	OsWrite.close();
 }
@@ -421,6 +438,14 @@ void CMFCApplication4Dlg::OnBnClickedOk()
 {
 	m_outStr = "";
 	TerminateThread(h, NULL);
+	if (m_inputFile1 == "") {
+		m_inputFile1 = inputList1[inputList1.size() - 1].c_str();
+		UpdateData(FALSE);
+	}
+	if (m_inputFile2 == "") {
+		m_inputFile2 = inputList2[inputList2.size() - 1].c_str();
+		UpdateData(FALSE);
+	}
 	h = CreateThread(NULL, 0, CalThread, this, 0, 0);
 }
 
@@ -433,17 +458,20 @@ void CMFCApplication4Dlg::OnEnChangeInputFile1()
 	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
 
 	// TODO:  在此添加控件通知处理程序代码
-	string t = (m_inputFile1.GetString());
-	if (inputList1.size() >= MAX_CNT) {
-		inputList1.pop();
-		inputList1.push(string(CT2A(m_inputFile1.GetString())));
-	}
-	else {
-		inputList1.push(string(CT2A(m_inputFile1.GetString())));
-	}
-
 	UpdateData();
 	UpdateData(FALSE);
+	string t = (m_inputFile1.GetString());
+	if (inputList1.size() >= MAX_CNT) {
+		inputList1.erase(inputList1.begin());
+		inputList1.push_back(t);
+	}
+	else {
+		inputList1.push_back(t);
+	}
+	m_inputFile1 = inputList1[inputList1.size() - 1].c_str();
+	//UpdateData();
+	UpdateData(FALSE);
+	//m_comInput.ShowWindow(TRUE);
 }
 
 
@@ -457,6 +485,18 @@ void CMFCApplication4Dlg::OnEnChangeInputFile2()
 	// TODO:  在此添加控件通知处理程序代码
 	UpdateData();
 	UpdateData(FALSE);
+	string t = (m_inputFile2.GetString());
+	if (inputList2.size() >= MAX_CNT) {
+		inputList2.erase(inputList2.begin());
+		inputList2.push_back(t);
+	}
+	else {
+		inputList2.push_back(t);
+	}
+	m_inputFile2 = inputList2[inputList2.size() - 1].c_str();
+	//UpdateData();
+	UpdateData(FALSE);
+	//m_comInput2.ShowWindow(TRUE);
 }
 
 
@@ -517,4 +557,94 @@ void CMFCApplication4Dlg::OnTimer(UINT_PTR nIDEvent)
 	//strTime = tm.Format("%Y/%m/%d %H:%M:%S");
 	//SetDlgItemText(IDC_TIME, strTime);        //显示系统时
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void CMFCApplication4Dlg::OnEnChangeEdit3()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+	// TODO:  在此添加控件通知处理程序代码
+	UpdateData();
+	if (m_outStr == "help") {
+		m_outStr = "";
+		UpdateData(FALSE);
+	}
+	else if (m_outStr == "cmp") {
+		m_outStr = "";
+		m_outStr = "Please Input [line] or [bin] to choose Cmp Type!\r\n";
+		//GetDlgItem(IDC_STATIC).SetWindowText("cmp");
+		UpdateData(FALSE);
+	}
+	else if (m_outStr == "line") {
+		m_outStr = "";
+		//GetDlgItem(IDC_STATIC).SetWindowText("line");
+		m_comType.SetCurSel(1);
+		UpdateData(FALSE);
+		lineCmp = true;
+	}
+	else if (m_outStr == "bin")
+	{
+		m_outStr = "";
+		//GetDlgItem(IDC_STATIC).SetWindowText("bin");
+		m_comType.SetCurSel(0);
+		UpdateData(FALSE);
+		lineCmp = false;
+	}
+}
+
+
+void CMFCApplication4Dlg::OnCbnSelchangeCombo1()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	if (m_comType.GetCurSel() == 0) {
+		lineCmp = false;
+	}
+	else
+	{
+		lineCmp = true;
+	}
+}
+
+
+void CMFCApplication4Dlg::OnCbnSelchangeCombo2()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	if (m_errorType.GetCurSel() == 1) {
+		errorTypenow = true;
+	}
+	else {
+		errorTypenow = false;
+	}
+}
+
+
+void CMFCApplication4Dlg::OnBnClickedCheck1()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	if (m_sameNameCmp) {
+		sameName = false;
+	}
+	else {
+		sameName = true;
+	}
+}
+
+
+void CMFCApplication4Dlg::OnBnClickedCheck2()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	if (m_sameNameCompare) {
+		sameName = true;
+	}
+	else {
+		sameName = false;
+	}
 }
