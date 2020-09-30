@@ -9,6 +9,7 @@
 #define IDI_ICON1                       131
 #define IDI_ICON2                       132
 #define IDI_ICON3                       133
+#define IDD_DIALOG1                     135
 #define IDC_INPUT_FILE1                 1000
 #define IDC_INPUT_FILE2                 1001
 #define IDC_EDIT3                       1002
@@ -24,14 +25,16 @@
 #define IDC_COMBO2                      1030
 #define IDC_CHECK1                      1031
 #define IDC_CHECK2                      1032
+#define IDC_EDIT1                       1045
+#define IDC_EDIT2                       1046
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        135
+#define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

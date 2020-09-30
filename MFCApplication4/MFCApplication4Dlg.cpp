@@ -629,10 +629,10 @@ void CMFCApplication4Dlg::OnBnClickedCheck1()
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
 	if (m_sameNameCmp) {
-		sameName = false;
+		logInfo = false;
 	}
 	else {
-		sameName = true;
+		logInfo = true;
 	}
 }
 

@@ -27,6 +27,7 @@ using namespace std;
 bool lineCmp = false;
 bool errorTypenow = true;
 bool sameName = true;
+bool logInfo = false;
 
 extern int g_proAll;
 extern int g_proOne;
@@ -350,4 +351,50 @@ void isSamePath(string filePath1, string filePath2,CString& reMsg,CMFCApplicatio
 		}
 	}
 	g_proAll = 100;
+}
+
+bool CmpLogFile(string file1, string file2, CString& reMsg, CMFCApplication4Dlg* hwnd) {
+	g_proOne = 0;
+	std::ifstream OsRead1(file1, std::ofstream::app);
+	std::ifstream OsRead2(file2, std::ofstream::app);
+	vector<string> str1_20;
+	vector<string> str2_20;
+	int index1 = 0;
+	int index2 = 0;
+	string str1;
+	string str2;
+	int lineNum = 1;
+	bool ret = true;
+	while (getline(OsRead1, str1)) {
+		if (!getline(OsRead2, str2)) {
+			reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
+			reMsg += file1.c_str();
+			reMsg += "\r\n*";
+			reMsg += file2.c_str();
+			reMsg += "\r\n";
+			reMsg += "NOT SAME SIZE!\r\n";
+			hwnd->UpdateData(FALSE);
+			return false;
+		}
+		if (str1 != str2) {
+			char temp[20];
+			_itoa(lineNum, temp, 10);
+			reMsg += "*--------------------------------NOTSAME----------------------------------\r\n*";
+			reMsg += file1.c_str();
+			reMsg += "---->:";
+			reMsg += str1.c_str();
+			reMsg += "\r\n*";
+			reMsg += file2.c_str();
+			reMsg += "---->:";
+			reMsg += str2.c_str();
+			reMsg += "\r\n";
+			reMsg += CString("NOT SAME Line at " + CString(temp) + "!\r\n");
+			hwnd->UpdateData(FALSE);
+			ret = false;
+			if (errorTypenow)
+				return ret;
+		}
+		lineNum++;
+	}
+	return ret;
 }
