@@ -64,4 +64,9 @@ public:
 	CButton m_sameNameCmp;
 	afx_msg void OnBnClickedCheck2();
 	CButton m_sameNameCompare;
+	afx_msg void OnBnClickedCheck3();
+	CButton detail;
+	ShowDlg *m_pDlg;
+	BOOL m_next10Line;
+	afx_msg void OnBnClickedCheck4();
 };

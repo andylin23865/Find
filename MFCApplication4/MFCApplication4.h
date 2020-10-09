@@ -9,6 +9,7 @@
 #endif
 
 #include "resource.h"		// 主符号
+#include "ShowDlg.h"
 
 
 // CMFCApplication4App:

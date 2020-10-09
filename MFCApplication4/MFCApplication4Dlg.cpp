@@ -27,6 +27,7 @@ bool update = true;
 extern bool lineCmp;
 extern bool errorTypenow;
 extern bool sameName;
+extern bool showDetail;
 
 #define MAX_CNT 3
 
@@ -131,6 +132,7 @@ CMFCApplication4Dlg::CMFCApplication4Dlg(CWnd* pParent /*=nullptr*/)
 	, m_inputFile1(_T(""))
 	, m_inputFile2(_T(""))
 	, m_outStr(_T(""))
+	, m_next10Line(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);
 }
@@ -158,6 +160,8 @@ void CMFCApplication4Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2, m_errorType);
 	DDX_Control(pDX, IDC_CHECK1, m_sameNameCmp);
 	DDX_Control(pDX, IDC_CHECK2, m_sameNameCompare);
+	DDX_Control(pDX, IDC_CHECK3, detail);
+	DDX_Check(pDX, IDC_CHECK4, m_next10Line);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication4Dlg, CDialogEx)
@@ -179,6 +183,8 @@ BEGIN_MESSAGE_MAP(CMFCApplication4Dlg, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_COMBO2, &CMFCApplication4Dlg::OnCbnSelchangeCombo2)
 	ON_BN_CLICKED(IDC_CHECK1, &CMFCApplication4Dlg::OnBnClickedCheck1)
 	ON_BN_CLICKED(IDC_CHECK2, &CMFCApplication4Dlg::OnBnClickedCheck2)
+	ON_BN_CLICKED(IDC_CHECK3, &CMFCApplication4Dlg::OnBnClickedCheck3)
+	ON_BN_CLICKED(IDC_CHECK4, &CMFCApplication4Dlg::OnBnClickedCheck4)
 END_MESSAGE_MAP()
 
 
@@ -253,7 +259,7 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 		inputList2.push_back(buffer);
 	}
 	//inputList2.push("555");
-	OsRead >> lineCmp >> errorTypenow >> sameName;
+	OsRead >> lineCmp >> errorTypenow >> sameName >> showDetail >> next10Line;
 	OsRead.close();
 	m_comType.AddString("bin");
 	m_comType.AddString("line");
@@ -263,8 +269,11 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 	m_errorType.AddString("now");
 	m_errorType.SetCurSel(errorTypenow);
 
-	m_sameNameCompare = sameName;
-	UpdateData(False);
+	m_sameNameCompare.SetCheck(sameName);
+	detail.SetCheck(showDetail);
+	m_next10Line = next10Line;
+
+	UpdateData(FALSE);
 
 	m_inputFile1 = inputList1[inputList1.size() - 1].c_str();
 	m_inputFile2 = inputList2[inputList2.size() - 1].c_str();
@@ -292,7 +301,7 @@ void CMFCApplication4Dlg::save()
 	for (int i = 0; i < size2; i++) {
 		OsWrite << inputList2[i].c_str() << endl;
 	}
-	OsWrite << lineCmp << " " << errorTypenow << " " << sameName <<endl;
+	OsWrite << lineCmp << " " << errorTypenow << " " << sameName << " " << showDetail << " " << next10Line <<endl;
 	OsWrite.close();
 }
 
@@ -441,6 +450,14 @@ static HANDLE h = NULL;
 
 void CMFCApplication4Dlg::OnBnClickedOk()
 {
+	if (m_pDlg != NULL)
+		delete m_pDlg;
+	m_pDlg = new ShowDlg;
+	m_pDlg->Create(IDD_DIALOG1, this);
+	m_pDlg->m_file1Name = "file1:" + m_inputFile1;
+	m_pDlg->m_file2Name.SetWindowTextA("file2:" + m_inputFile2);
+	m_pDlg->UpdateData(FALSE);
+	m_pDlg->ShowWindow(false);
 	m_outStr = "";
 	TerminateThread(h, NULL);
 	if (m_inputFile1 == "") {
@@ -633,7 +650,7 @@ void CMFCApplication4Dlg::OnBnClickedCheck1()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
-	if (m_sameNameCmp) {
+	if (m_sameNameCmp.GetCheck()) {
 		logInfo = false;
 	}
 	else {
@@ -646,10 +663,36 @@ void CMFCApplication4Dlg::OnBnClickedCheck2()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
-	if (m_sameNameCompare) {
+	if (m_sameNameCompare.GetCheck()) {
 		sameName = true;
 	}
 	else {
 		sameName = false;
+	}
+}
+
+
+void CMFCApplication4Dlg::OnBnClickedCheck3()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	if (detail.GetCheck()) {
+		showDetail = true;
+	}
+	else {
+		showDetail = false;
+	}
+}
+
+
+void CMFCApplication4Dlg::OnBnClickedCheck4()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	if (m_next10Line) {
+		next10Line = true;
+	}
+	else {
+		next10Line = false;
 	}
 }
