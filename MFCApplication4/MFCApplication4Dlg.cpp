@@ -253,14 +253,18 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 		inputList2.push_back(buffer);
 	}
 	//inputList2.push("555");
+	OsRead >> lineCmp >> errorTypenow >> sameName;
 	OsRead.close();
 	m_comType.AddString("bin");
 	m_comType.AddString("line");
-	m_comType.SetCurSel(0);
+	m_comType.SetCurSel(lineCmp);
 
 	m_errorType.AddString("all");
 	m_errorType.AddString("now");
-	m_errorType.SetCurSel(1);
+	m_errorType.SetCurSel(errorTypenow);
+
+	m_sameNameCompare = sameName;
+	UpdateData(False);
 
 	m_inputFile1 = inputList1[inputList1.size() - 1].c_str();
 	m_inputFile2 = inputList2[inputList2.size() - 1].c_str();
@@ -288,6 +292,7 @@ void CMFCApplication4Dlg::save()
 	for (int i = 0; i < size2; i++) {
 		OsWrite << inputList2[i].c_str() << endl;
 	}
+	OsWrite << lineCmp << " " << errorTypenow << " " << sameName <<endl;
 	OsWrite.close();
 }
 

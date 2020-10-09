@@ -36,9 +36,6 @@
     <ClInclude Include="same.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="ShowDlg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication4.cpp">
@@ -48,9 +45,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ShowDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

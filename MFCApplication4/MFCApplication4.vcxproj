@@ -193,7 +193,6 @@
     <ClInclude Include="MFCApplication4Dlg.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="ShowDlg.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="same.h" />
   </ItemGroup>
@@ -206,7 +205,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ShowDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCApplication4.rc" />

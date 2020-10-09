@@ -1,7 +1,4 @@
-3 3
-2
-1
+1 1
 C:\Users\YS\Desktop\tremp\fast.txt
-
-
-C:\Users\YS\Desktop\tremp\fast - ¸±±¾.txt
+C:\Users\YS\Desktop\tremp\fast
+1 1 1
