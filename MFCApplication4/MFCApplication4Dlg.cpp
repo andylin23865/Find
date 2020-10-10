@@ -162,6 +162,7 @@ void CMFCApplication4Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK2, m_sameNameCompare);
 	DDX_Control(pDX, IDC_CHECK3, detail);
 	DDX_Check(pDX, IDC_CHECK4, m_next10Line);
+	DDX_Control(pDX, IDC_COMBO3, m_erroeLevel);
 }
 
 BEGIN_MESSAGE_MAP(CMFCApplication4Dlg, CDialogEx)
@@ -185,6 +186,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication4Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK2, &CMFCApplication4Dlg::OnBnClickedCheck2)
 	ON_BN_CLICKED(IDC_CHECK3, &CMFCApplication4Dlg::OnBnClickedCheck3)
 	ON_BN_CLICKED(IDC_CHECK4, &CMFCApplication4Dlg::OnBnClickedCheck4)
+	ON_CBN_SELCHANGE(IDC_COMBO3, &CMFCApplication4Dlg::OnCbnSelchangeCombo3)
 END_MESSAGE_MAP()
 
 
@@ -259,7 +261,7 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 		inputList2.push_back(buffer);
 	}
 	//inputList2.push("555");
-	OsRead >> lineCmp >> errorTypenow >> sameName >> showDetail >> next10Line;
+	OsRead >> lineCmp >> errorTypenow >> sameName >> showDetail >> next10Line >> errorLevel;
 	OsRead.close();
 	m_comType.AddString("bin");
 	m_comType.AddString("line");
@@ -272,6 +274,11 @@ BOOL CMFCApplication4Dlg::OnInitDialog()
 	m_sameNameCompare.SetCheck(sameName);
 	detail.SetCheck(showDetail);
 	m_next10Line = next10Line;
+
+	m_erroeLevel.AddString("all Level");
+	m_erroeLevel.AddString("Not Find");
+	m_erroeLevel.AddString("Not Same");
+	m_erroeLevel.SetCurSel(errorLevel);
 
 	UpdateData(FALSE);
 
@@ -301,7 +308,7 @@ void CMFCApplication4Dlg::save()
 	for (int i = 0; i < size2; i++) {
 		OsWrite << inputList2[i].c_str() << endl;
 	}
-	OsWrite << lineCmp << " " << errorTypenow << " " << sameName << " " << showDetail << " " << next10Line <<endl;
+	OsWrite << lineCmp << " " << errorTypenow << " " << sameName << " " << showDetail << " " << next10Line  <<" " << errorLevel<<endl;
 	OsWrite.close();
 }
 
@@ -695,4 +702,12 @@ void CMFCApplication4Dlg::OnBnClickedCheck4()
 	else {
 		next10Line = false;
 	}
+}
+
+
+void CMFCApplication4Dlg::OnCbnSelchangeCombo3()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+	errorLevel = m_erroeLevel.GetCurSel();
 }

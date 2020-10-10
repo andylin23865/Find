@@ -69,4 +69,6 @@ public:
 	ShowDlg *m_pDlg;
 	BOOL m_next10Line;
 	afx_msg void OnBnClickedCheck4();
+	CComboBox m_erroeLevel;
+	afx_msg void OnCbnSelchangeCombo3();
 };
